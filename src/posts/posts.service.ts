@@ -15,6 +15,11 @@ export class PostsService {
      */
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
+    /**
+     * Injecting metaOptionsRepository
+     */
+    @InjectRepository(MetaOption)
+    private readonly metaOptionsRepository: Repository<MetaOption>,
   ) {}
 
   public async create(createPostDto: CreatePostDto) {
@@ -26,11 +31,7 @@ export class PostsService {
   }
 
   public async findAll() {
-    const posts = await this.postsRepository.find({
-      relations: {
-        metaOptions: true,
-      },
-    });
+    const posts = await this.postsRepository.find();
     return posts;
   }
 
@@ -42,7 +43,19 @@ export class PostsService {
     return `This action updates a #${id} post`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  public async remove(id: number) {
+    //Find the post
+    let post = await this.postsRepository.findOneBy({ id });
+
+    // delete the post
+    await this.postsRepository.delete(id);
+
+    //Delete the meta options if has
+    if (post?.metaOptions) {
+      await this.metaOptionsRepository.delete(post?.metaOptions?.id);
+    }
+
+    // confirmation
+    return { deleted: true, id };
   }
 }
