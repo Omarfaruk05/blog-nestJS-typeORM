@@ -3,8 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
-import { User } from './users/user.entity';
 import { PostsModule } from './posts/posts.module';
+import { TagsModule } from './tags/tags.module';
+import { MetaOptionsModule } from './meta-options/meta-options.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -12,7 +13,8 @@ import { PostsModule } from './posts/posts.module';
       inject: [],
       useFactory: () => ({
         type: 'postgres',
-        entities: [User],
+        // entities: [User, Post, MetaOption],
+        autoLoadEntities: true,
         synchronize: true,
         port: 5432,
         username: 'postgres',
@@ -23,6 +25,8 @@ import { PostsModule } from './posts/posts.module';
     }),
     UsersModule,
     PostsModule,
+    TagsModule,
+    MetaOptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

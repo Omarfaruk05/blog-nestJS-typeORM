@@ -16,7 +16,7 @@ import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { postType } from '../enums/postType.enum';
 import { postStatus } from '../enums/postStatus.enum';
-import { CreatePostMetaOptionsDto } from './create-post-meta-options.dto';
+import { CreatePostMetaOptionsDto } from '../../meta-options/dtos/create-post-meta-options.dto';
 
 export class CreatePostDto {
   @ApiProperty({
@@ -105,16 +105,15 @@ export class CreatePostDto {
   tags?: string[];
 
   @ApiPropertyOptional({
-    type: 'array',
+    type: 'object',
     required: false,
     items: {
       type: 'object',
       properties: {
-        key: {
-          type: 'string',
-          description:
-            'The key can be any string identifier for your meta option.',
-          example: 'sidebarEnabled',
+        metaValue: {
+          type: 'json',
+          description: 'The meta Value is JSON string',
+          example: '{"sidebarEnabled": true}',
         },
         value: {
           type: 'any',
@@ -125,8 +124,7 @@ export class CreatePostDto {
     },
   })
   @IsOptional()
-  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreatePostMetaOptionsDto)
-  metaOptions?: CreatePostMetaOptionsDto[];
+  metaOptions?: CreatePostMetaOptionsDto | null;
 }
