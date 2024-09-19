@@ -11,4 +11,8 @@ export class UsersController {
     const result = this.usersService.createUser(createUserDto);
     return result;
   }
+
+  public getUsers() {
+    return this.usersService.findAll();
+  }
 }

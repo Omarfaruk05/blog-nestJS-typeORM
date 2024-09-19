@@ -16,15 +16,15 @@ export class User {
   @Column({
     type: 'varchar',
     length: 96,
-    nullable: true,
+    nullable: false,
   })
   lastName: string;
 
   @Column({
     type: 'varchar',
     length: 96,
-    unique: true,
     nullable: false,
+    unique: true,
   })
   email: string;
 
@@ -32,7 +32,6 @@ export class User {
     type: 'varchar',
     length: 96,
     nullable: false,
-    unique: true,
   })
   password: string;
 
