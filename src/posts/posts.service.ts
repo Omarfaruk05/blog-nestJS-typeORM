@@ -4,32 +4,39 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
-import { MetaOption } from 'src/meta-options/entities/metaOption.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class PostsService {
   constructor(
     /**
+     * Injecting Users Service
+     */
+    private readonly userService: UsersService,
+
+    /**
      * Injecting postRepository
      */
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
-    /**
-     * Injecting metaOptionsRepository
-     */
-    @InjectRepository(MetaOption)
-    private readonly metaOptionsRepository: Repository<MetaOption>,
   ) {}
 
+  /**
+   * Create Post
+   */
   public async create(createPostDto: CreatePostDto) {
+    // Find the author  from database based an authorId
+    let author = await this.userService.findOneById(createPostDto?.authorId);
+
     // Create post
-    let post = this.postsRepository.create(createPostDto);
+    let post = this.postsRepository.create({
+      ...createPostDto,
+      author: author,
+    });
 
     // return the post
     return await this.postsRepository.save(post);
   }
-
   public async findAll() {
     const posts = await this.postsRepository.find();
     return posts;
@@ -44,16 +51,8 @@ export class PostsService {
   }
 
   public async remove(id: number) {
-    //Find the post
-    let post = await this.postsRepository.findOneBy({ id });
-
     // delete the post
     await this.postsRepository.delete(id);
-
-    //Delete the meta options if has
-    if (post?.metaOptions) {
-      await this.metaOptionsRepository.delete(post?.metaOptions?.id);
-    }
 
     // confirmation
     return { deleted: true, id };
