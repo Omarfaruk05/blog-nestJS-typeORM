@@ -35,8 +35,8 @@ export class TagsService {
     return `This action updates a #${id} tag`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tag`;
+  public async remove(id: number) {
+    await this.tagsRepository.delete(id);
   }
 
   public async findMultipleTags(tags: number[]) {
@@ -46,5 +46,14 @@ export class TagsService {
       },
     });
     return results;
+  }
+
+  public async softRemove(id: number) {
+    await this.tagsRepository.softDelete(id);
+
+    return {
+      delete: true,
+      id,
+    };
   }
 }

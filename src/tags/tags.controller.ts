@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TagsService } from './tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
@@ -35,8 +36,13 @@ export class TagsController {
     return this.tagsService.update(+id, updateTagDto);
   }
 
+  @Delete('soft-delete/:id')
+  public softDelete(@Param('id', ParseIntPipe) id: number) {
+    return this.tagsService.softRemove(id);
+  }
+
   @Delete(':id')
-  public remove(@Param('id') id: string) {
-    return this.tagsService.remove(+id);
+  public remove(@Param('id', ParseIntPipe) id: number) {
+    return this.tagsService.remove(id);
   }
 }
