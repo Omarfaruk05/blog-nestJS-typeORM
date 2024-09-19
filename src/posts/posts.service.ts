@@ -47,6 +47,7 @@ export class PostsService {
     // return the post
     return await this.postsRepository.save(post);
   }
+
   public async findAll() {
     const posts = await this.postsRepository.find();
     return posts;
@@ -56,8 +57,31 @@ export class PostsService {
     return `This action returns a #${id} post`;
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  public async update(updatePostDto: UpdatePostDto) {
+    // Find the Tags
+    let tags = await this.tagsService.findMultipleTags(updatePostDto.tags);
+
+    // Find the post
+    let post = await this.postsRepository.findOneBy({ id: updatePostDto?.id });
+
+    // Update the properties
+    post.title = updatePostDto.title ?? post?.title;
+    post.content = updatePostDto.content ?? post?.content;
+    post.status = updatePostDto.status ?? post?.status;
+    post.postType = updatePostDto.postType ?? post?.postType;
+    post.slug = updatePostDto.slug ?? post?.slug;
+    post.featuredImageUrl =
+      updatePostDto.featuredImageUrl ?? post?.featuredImageUrl;
+    post.publishedOn = updatePostDto.publishedOn ?? post?.publishedOn;
+
+    // Assign the new tags
+
+    post.tags = tags;
+
+    //Save the post and return
+    const result = await this.postsRepository.save(post);
+
+    return result;
   }
 
   public async remove(id: number) {
