@@ -1,4 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,20 +29,45 @@ export class UsersService {
    * Create User
    */
   public async createUser(createUserDto: CreateUserDto) {
-    // check is user exists with the same email
-    const isExist = await this.userRepository.findOne({
-      where: {
-        email: createUserDto.email,
-      },
-    });
+    let existingUser = undefined;
+
+    try {
+      // check is user exists with the same email
+      existingUser = await this.userRepository.findOne({
+        where: {
+          email: createUserDto.email,
+        },
+      });
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
 
     // handle exception
 
+    if (existingUser) {
+      throw new BadRequestException(
+        'The user already exists, please check your email.',
+      );
+    }
     // Create a new user
 
-    const newUser = this.userRepository.create(createUserDto);
-    const result = await this.userRepository.save(newUser);
-    return result;
+    let newUser = this.userRepository.create(createUserDto);
+    try {
+      newUser = await this.userRepository.save(newUser);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+    return newUser;
   }
   /**
    * Public method responsible for handling GET request for '/users' endpoint
@@ -63,7 +93,23 @@ export class UsersService {
    * find single user by ID
    */
   public async findOneById(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
+    let user = undefined;
+    try {
+      user = await this.userRepository.findOneBy({ id });
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+
+    // handle user does not exist
+
+    if (!user) {
+      throw new BadRequestException('The user id does not exist!');
+    }
 
     return user;
   }
