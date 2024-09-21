@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +12,7 @@ import { TagsService } from 'src/tags/tags.service';
 import { GetPostsDto } from './dto/get-posts.dto';
 import { PaginationProvider } from 'src/common/pagination/pagination.provider';
 import { Paginated } from 'src/common/pagination/interfaces/pagination.interface';
+import { UsersService } from 'src/users/providers/users.service';
 
 @Injectable()
 export class PostsService {
