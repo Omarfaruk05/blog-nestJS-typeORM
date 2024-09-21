@@ -4,7 +4,7 @@ import {
   Injectable,
   RequestTimeoutException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,6 +23,12 @@ export class UsersService {
 
     @Inject(profileConfig.KEY)
     private readonly profileConfiguration: ConfigType<typeof profileConfig>,
+
+    /**
+     * Inject dataSource
+     */
+
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -69,6 +75,39 @@ export class UsersService {
     }
     return newUser;
   }
+
+  /**
+   * Create multiple user
+   */
+
+  public async createMany(createUsersDto: CreateUserDto[]) {
+    let newUsers: User[] = [];
+    //Create query runner instance
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    // Connect query runner to data source
+    await queryRunner.connect();
+
+    // start transaction
+    await queryRunner.startTransaction();
+    try {
+      for (let user of createUsersDto) {
+        let newUser = queryRunner.manager.create(User, user);
+        let result = await queryRunner.manager.save(newUser);
+        newUsers.push(result);
+      }
+
+      // If successful commit the transaction
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      // If unsuccessful rollback
+      await queryRunner.rollbackTransaction();
+    } finally {
+      // Release connection
+      await queryRunner.release();
+    }
+  }
+
   /**
    * Public method responsible for handling GET request for '/users' endpoint
    */
