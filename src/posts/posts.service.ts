@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TagsService } from 'src/tags/tags.service';
+import { GetPostsDto } from './dto/get-posts.dto';
 
 @Injectable()
 export class PostsService {
@@ -52,8 +53,11 @@ export class PostsService {
     return await this.postsRepository.save(post);
   }
 
-  public async findAll() {
-    const posts = await this.postsRepository.find();
+  public async findAll(postQuery: GetPostsDto) {
+    const posts = await this.postsRepository.find({
+      skip: (postQuery?.page - 1) * postQuery?.limit,
+      take: postQuery?.limit,
+    });
     return posts;
   }
 

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateManyUsersDto } from './dto/create-many-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -15,8 +16,12 @@ export class UsersController {
 
   @Post()
   public createUsers(@Body() createUserDto: CreateUserDto) {
-    const result = this.usersService.createUser(createUserDto);
-    return result;
+    return this.usersService.createUser(createUserDto);
+  }
+
+  @Post('/create-many')
+  public createManyUsers(@Body() createManyUsersDto: CreateManyUsersDto) {
+    return this.usersService.createMany(createManyUsersDto);
   }
 
   @Get()

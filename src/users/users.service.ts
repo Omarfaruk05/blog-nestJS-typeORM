@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   RequestTimeoutException,
@@ -10,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import profileConfig from './config/profile.config';
+import { CreateManyUsersDto } from './dto/create-many-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -80,18 +82,24 @@ export class UsersService {
    * Create multiple user
    */
 
-  public async createMany(createUsersDto: CreateUserDto[]) {
+  public async createMany(createManyUsersDto: CreateManyUsersDto) {
     let newUsers: User[] = [];
+
     //Create query runner instance
     const queryRunner = this.dataSource.createQueryRunner();
 
-    // Connect query runner to data source
-    await queryRunner.connect();
-
-    // start transaction
-    await queryRunner.startTransaction();
     try {
-      for (let user of createUsersDto) {
+      // Connect query runner to data source
+      await queryRunner.connect();
+
+      // start transaction
+      await queryRunner.startTransaction();
+    } catch (error) {
+      throw new RequestTimeoutException('Could not connect to the database.');
+    }
+
+    try {
+      for (let user of createManyUsersDto.users) {
         let newUser = queryRunner.manager.create(User, user);
         let result = await queryRunner.manager.save(newUser);
         newUsers.push(result);
@@ -102,10 +110,22 @@ export class UsersService {
     } catch (error) {
       // If unsuccessful rollback
       await queryRunner.rollbackTransaction();
+
+      throw new ConflictException('Could not complete the transaction', {
+        description: String(error),
+      });
     } finally {
-      // Release connection
-      await queryRunner.release();
+      try {
+        // Release connection
+        await queryRunner.release();
+      } catch (error) {
+        throw new RequestTimeoutException('Could not release the connection', {
+          description: String(error),
+        });
+      }
     }
+
+    return newUsers;
   }
 
   /**
