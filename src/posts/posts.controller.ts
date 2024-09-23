@@ -9,18 +9,23 @@ import {
   ParseIntPipe,
   Query,
 } from '@nestjs/common';
-import { PostsService } from './posts.service';
+import { PostsService } from './providers/posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { GetPostsDto } from './dto/get-posts.dto';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  create(
+    @Body() createPostDto: CreatePostDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    return this.postsService.create(createPostDto, user);
   }
 
   @Get()

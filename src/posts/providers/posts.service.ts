@@ -3,25 +3,22 @@ import {
   Injectable,
   RequestTimeoutException,
 } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { CreatePostDto } from '../dto/create-post.dto';
+import { UpdatePostDto } from '../dto/update-post.dto';
 import { Repository } from 'typeorm';
-import { Post } from './entities/post.entity';
+import { Post } from '../entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TagsService } from 'src/tags/tags.service';
-import { GetPostsDto } from './dto/get-posts.dto';
+import { GetPostsDto } from '../dto/get-posts.dto';
 import { PaginationProvider } from 'src/common/pagination/pagination.provider';
 import { Paginated } from 'src/common/pagination/interfaces/pagination.interface';
 import { UsersService } from 'src/users/providers/users.service';
+import { CreatePostProvider } from './create-post.provider';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 
 @Injectable()
 export class PostsService {
   constructor(
-    /**
-     * Injecting Users Service
-     */
-    private readonly userService: UsersService,
-
     /**
      * Injecting postRepository
      */
@@ -32,32 +29,24 @@ export class PostsService {
      */
 
     private readonly tagsService: TagsService,
+
     /**
      * Inject pagination provider
      */
-
     private readonly paginationProvider: PaginationProvider,
+
+    /**
+     * Inject createPostProvider
+     */
+
+    private readonly createPostProvider: CreatePostProvider,
   ) {}
 
   /**
    * Create Post
    */
-  public async create(createPostDto: CreatePostDto) {
-    // Find the author  from database based an authorId
-    let author = await this.userService.findOneById(createPostDto?.authorId);
-
-    //Find tags
-
-    let tags = await this.tagsService.findMultipleTags(createPostDto.tags);
-    // Create post
-    let post = this.postsRepository.create({
-      ...createPostDto,
-      author: author,
-      tags: tags,
-    });
-
-    // return the post
-    return await this.postsRepository.save(post);
+  public async create(createPostDto: CreatePostDto, user: ActiveUserData) {
+    return await this.createPostProvider.create(createPostDto, user);
   }
 
   public async findAll(postQuery: GetPostsDto): Promise<Paginated<Post>> {

@@ -72,7 +72,7 @@ export class Post {
     type: 'timestamp', // in mySQL type: "datetime"
     nullable: true,
   })
-  publishedOn?: Date;
+  publishedOn?: string;
 
   @OneToOne(() => MetaOption, (metaOptions) => metaOptions.post, {
     cascade: true,
