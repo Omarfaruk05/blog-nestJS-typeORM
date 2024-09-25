@@ -9,7 +9,7 @@ import { DataSource, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { ConfigService, ConfigType } from '@nestjs/config';
+import { ConfigType } from '@nestjs/config';
 import profileConfig from '../config/profile.config';
 import { CreateManyUsersDto } from '../dto/create-many-user.dto';
 import { CreateUserProvider } from './create-user.provider';
