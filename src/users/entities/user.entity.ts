@@ -37,6 +37,13 @@ export class User {
   @Exclude()
   password: string;
 
+  @Column({
+    type: 'varchar',
+    length: 16,
+    default: 'user',
+  })
+  role: string;
+
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 }

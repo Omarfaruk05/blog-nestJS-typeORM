@@ -3,4 +3,7 @@ export interface ActiveUserData {
   sub: number;
   // email of database
   email: string;
+
+  // role of database
+  role: string;
 }

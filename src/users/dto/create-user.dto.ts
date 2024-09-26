@@ -51,4 +51,12 @@ export class CreateUserDto {
     },
   )
   password: string;
+
+  /**
+   * role
+   */
+  @IsString()
+  @IsOptional()
+  @MaxLength(16)
+  role: string;
 }
