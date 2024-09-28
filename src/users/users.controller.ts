@@ -26,7 +26,6 @@ export class UsersController {
   }
 
   @Post('/create-many')
-  @Roles('user')
   public createManyUsers(@Body() createManyUsersDto: CreateManyUsersDto) {
     return this.usersService.createMany(createManyUsersDto);
   }
@@ -36,6 +35,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
   @Get('/:id')
+  @Roles('user')
   public getSingleUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOneById(id);
   }
